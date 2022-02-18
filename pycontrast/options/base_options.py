@@ -12,9 +12,9 @@ class BaseOptions(object):
         self.override_dict = {
             'InsDis':  ['RGB', False, 'bank', 'A', 'linear', 0.07],
             'CMC':     ['CMC', False, 'bank', 'C', 'linear', 0.07],
-            'MoCo':    ['RGB', False, 'moco', 'A', 'linear', 0.07],
+            'MoCo':    ['RGB', False, 'moco', 'A', 'linear', 0.07], 
             'PIRL':    ['RGB', True,  'bank', 'A', 'linear', 0.07],
-            'MoCov2':  ['RGB', False, 'moco', 'B', 'mlp',    0.2],
+            'MoCov2':  ['RGB', False, 'moco', 'B', 'mlp',    0.2], # modal, jigsaw, mem, aug, head, nce_t
             'CMCv2':   ['CMC', False, 'moco', 'E', 'mlp',    0.2],
             'InfoMin': ['RGB', True,  'moco', 'D', 'mlp',    0.15],
         }

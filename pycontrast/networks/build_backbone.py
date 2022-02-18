@@ -6,7 +6,7 @@ from .util import Normalize, JigsawHead
 
 class RGBSingleHead(nn.Module):
     """RGB model with a single linear/mlp projection head"""
-    def __init__(self, name='resnet50', head='linear', feat_dim=128):
+    def __init__(self, name='resnet50', head='linear', feat_dim=128, sup_mode=''):
         super(RGBSingleHead, self).__init__()
 
         name, width = self._parse_width(name)
@@ -30,6 +30,8 @@ class RGBSingleHead(nn.Module):
         else:
             raise NotImplementedError(
                 'head not supported: {}'.format(head))
+        
+        self.online_clf = nn.Linear(dim_in, 1000)
 
     @staticmethod
     def _parse_width(name):
@@ -49,6 +51,9 @@ class RGBSingleHead(nn.Module):
         if mode == 0 or mode == 1:
             feat = self.head(feat)
         return feat
+
+    def forward_online_clf(self, x):
+        return self.online_clf(x.detach())
 
 
 class RGBMultiHeads(RGBSingleHead):
@@ -190,9 +195,9 @@ def build_model(opt):
     branch = 'Mul' if opt.jigsaw else 'Sin'
     model_key = opt.modal + branch
 
-    model = NAME_TO_FUNC[model_key](opt.arch, opt.head, opt.feat_dim)
+    model = NAME_TO_FUNC[model_key](opt.arch, opt.head, opt.feat_dim, opt.sup_mode)
     if opt.mem == 'moco':
-        model_ema = NAME_TO_FUNC[model_key](opt.arch, opt.head, opt.feat_dim)
+        model_ema = NAME_TO_FUNC[model_key](opt.arch, opt.head, opt.feat_dim, opt.sup_mode)
     else:
         model_ema = None
 

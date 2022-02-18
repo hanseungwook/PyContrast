@@ -18,6 +18,9 @@ class TrainOptions(BaseOptions):
                             help='using mixed precision')
         parser.add_argument('--opt_level', type=str, default='O2',
                             choices=['O1', 'O2'])
+        parser.add_argument('--sup_mode', type=str, default='',
+                            help='Supervised mode (SupCon, SupCon + Negative boosting)',
+                            choices=['supcon', 'negboost'])
 
         return parser
 

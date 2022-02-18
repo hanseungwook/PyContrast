@@ -14,17 +14,23 @@ class BaseMoCo(nn.Module):
     def _update_pointer(self, bsz):
         self.index = (self.index + bsz) % self.K
 
-    def _update_memory(self, k, queue):
+    def _update_memory(self, k, queue, k_labels, queue_labels=None):
         """
         Args:
           k: key feature
           queue: memory buffer
+          labels: labels of key feature
+          queue_labels: labels of memory buffer
         """
         with torch.no_grad():
             num_neg = k.shape[0]
             out_ids = torch.arange(num_neg).cuda()
             out_ids = torch.fmod(out_ids + self.index, self.K).long()
             queue.index_copy_(0, out_ids, k)
+
+            # Updating label memory
+            if k_labels is not None and queue_labels is not None:
+                queue_labels.index_copy_(0, out_ids, k_labels)
 
     def _compute_logit(self, q, k, queue):
         """
@@ -47,6 +53,41 @@ class BaseMoCo(nn.Module):
         out = out.squeeze().contiguous()
 
         return out
+    
+    def _compute_loss_with_labels(self, q, k, queue, batch_labels, queue_labels):
+        """
+        Args:
+          q: query/anchor feature
+          k: key feature
+          queue: memory buffer
+          batch_labels: labels of q
+          queue_labels: labels of memory buffer
+        """
+        # bsz = q.shape[0]
+        # qsz = queue.shape[0]
+        k_queue = torch.cat([k, queue], dim=0)
+        k_queue_labels = torch.cat([batch_labels, queue_labels], dim=0)
+
+        logits = torch.mm(q, k_queue.transpose(1, 0))
+        logits = torch.div(logits, self.T)
+        logits = torch.subtract(logits, torch.max(logits.detach(), dim=1, keepdim=True))
+        exp_logits = torch.exp(logits)
+
+        positives_mask = torch.eq(batch_labels, k_queue_labels.T).float().to(q.device)
+        negatives_mask = 1. - positives_mask
+        num_positives_per_row = torch.sum(positives_mask, dim=1)
+
+        denominator = torch.sum(exp_logits * negatives_mask, axis=1, keepdim=True) + torch.sum(exp_logits * positives_mask, axis=1, keepdim=True)
+        log_probs = (logits - torch.log(denominator)) * positives_mask
+        log_probs = torch.sum(log_probs, dim=1)
+        log_probs = torch.divide(log_probs, num_positives_per_row)
+
+        loss = -log_probs
+
+        # Scaling by temperature -- helps normalize the loss (based on TensorFlow implementation)
+        loss *= self.T
+
+        return loss.mean()
 
 
 class RGBMoCo(BaseMoCo):
@@ -55,9 +96,11 @@ class RGBMoCo(BaseMoCo):
         super(RGBMoCo, self).__init__(K, T)
         # create memory queue
         self.register_buffer('memory', torch.randn(K, n_dim))
+        # create memory label queue
+        self.register_buffer('memory_labels', torch.randn(K, 1))
         self.memory = F.normalize(self.memory)
 
-    def forward(self, q, k, q_jig=None, all_k=None):
+    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, all_k_labels=None):
         """
         Args:
           q: query on current node
@@ -70,7 +113,14 @@ class RGBMoCo(BaseMoCo):
 
         # compute logit
         queue = self.memory.clone().detach()
-        logits = self._compute_logit(q, k, queue)
+        
+        if batch_labels is None:
+            logits = self._compute_logit(q, k, queue)
+        # Using labels in supervised setting (SupCon)
+        else:
+            queue_labels = self.memory_label.clone().detach()
+            logits = self._compute_logits_with_labels(q, k, queue, batch_labels, queue_labels)
+
         if q_jig is not None:
             logits_jig = self._compute_logit(q_jig, k, queue)
 
@@ -79,7 +129,11 @@ class RGBMoCo(BaseMoCo):
 
         # update memory
         all_k = all_k if all_k is not None else k
-        self._update_memory(all_k, self.memory)
+        if batch_labels is None:
+            self._update_memory(all_k, self.memory)
+        else:
+            self._update_memory(all_k, self.memory, self.memory_labels)
+
         self._update_pointer(all_k.size(0))
 
         if q_jig is not None:
