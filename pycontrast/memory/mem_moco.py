@@ -119,7 +119,7 @@ class RGBMoCo(BaseMoCo):
         # Using labels in supervised setting (SupCon)
         else:
             queue_labels = self.memory_label.clone().detach()
-            logits = self._compute_logits_with_labels(q, k, queue, batch_labels, queue_labels)
+            logits = self._compute_loss_with_labels(q, k, queue, batch_labels, queue_labels)
 
         if q_jig is not None:
             logits_jig = self._compute_logit(q_jig, k, queue)
