@@ -76,6 +76,7 @@ class ContrastTrainer(BaseTrainer):
         """
         if self.args.modal == 'RGB':
             dist.broadcast(contrast.memory, 0)
+            dist.broadcast(contrast.memory_labels, 0)
         else:
             dist.broadcast(contrast.memory_1, 0)
             dist.broadcast(contrast.memory_2, 0)
