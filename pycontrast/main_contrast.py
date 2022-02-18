@@ -12,7 +12,7 @@ from options.train_options import TrainOptions
 from learning.contrast_trainer import ContrastTrainer
 from networks.build_backbone import build_model
 from datasets.util import build_contrast_loader
-from memory.build_memory import build_mem
+from memory.build_memory import build_mem, load_topk
 
 
 def main():
@@ -40,6 +40,9 @@ def main_worker(gpu, ngpus_per_node, args):
     # build dataset
     train_dataset, train_loader, train_sampler = \
         build_contrast_loader(args, ngpus_per_node)
+
+    # load top k predictions from a pre-trained classiifer
+    topk_dict = load_topk(args)
 
     # build memory
     contrast = build_mem(args, len(train_dataset))
@@ -69,7 +72,7 @@ def main_worker(gpu, ngpus_per_node, args):
         trainer.adjust_learning_rate(optimizer, epoch)
 
         outs = trainer.train(epoch, train_loader, model, model_ema,
-                             contrast, criterion, optimizer)
+                             contrast, criterion, optimizer, topk_dict)
 
         # log to tensorbard
         trainer.logging(epoch, outs, optimizer.param_groups[0]['lr'])

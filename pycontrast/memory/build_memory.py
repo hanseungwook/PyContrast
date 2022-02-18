@@ -1,6 +1,8 @@
+import os
+import pickle
+
 from .mem_bank import RGBMem, CMCMem
 from .mem_moco import RGBMoCo, CMCMoCo
-
 
 def build_mem(opt, n_data):
     if opt.mem == 'bank':
@@ -15,3 +17,9 @@ def build_mem(opt, n_data):
             'mem not suported: {}'.format(opt.mem))
 
     return memory
+
+def load_topk(args):
+    if os.path.isfile(args.topk_path):
+        with open(args.topk_path, 'rb') as f:
+            return pickle.load(f)
+

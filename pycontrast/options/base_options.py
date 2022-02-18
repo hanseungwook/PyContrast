@@ -27,6 +27,8 @@ class BaseOptions(object):
                             help='path to save model')
         parser.add_argument('--tb_path', type=str, default='./tb',
                             help='path to tensorboard')
+        parser.add_argument('--topk_path', type=str, default='./imagenet_resnet50_top10.pkl',
+                            help='path to topk predictions from pre-trained classifier')
 
         # basics
         parser.add_argument('--print_freq', type=int, default=10,

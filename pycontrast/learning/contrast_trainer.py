@@ -131,7 +131,7 @@ class ContrastTrainer(BaseTrainer):
             del state
 
     def train(self, epoch, train_loader, model, model_ema, contrast,
-              criterion, optimizer):
+              criterion, optimizer, topk_dict=None):
         """one epoch training"""
         args = self.args
         model.train()
@@ -139,7 +139,7 @@ class ContrastTrainer(BaseTrainer):
         time1 = time.time()
         if args.mem == 'moco':
             outs = self._train_moco(epoch, train_loader, model, model_ema,
-                                    contrast, criterion, optimizer)
+                                    contrast, criterion, optimizer, topk_dict)
         else:
             outs = self._train_mem(epoch, train_loader, model,
                                    contrast, criterion, optimizer)
@@ -228,7 +228,7 @@ class ContrastTrainer(BaseTrainer):
         return accuracies
 
     def _train_moco(self, epoch, train_loader, model, model_ema, contrast,
-                    criterion, optimizer):
+                    criterion, optimizer, topk_dict):
         """
         MoCo encoder style training. This needs two forward passes,
         one for normal encoder, and one for moco encoder
@@ -258,6 +258,11 @@ class ContrastTrainer(BaseTrainer):
             batch_labels = batch_labels.float().cuda(args.gpu, non_blocking=True)
             bsz = inputs.size(0)
 
+            # Get top k labels for masking
+            pad = torch.nn.ConstantPad1d((0,1), -1)
+            topk_labels = [topk_dict[int(i)] if len(topk_dict[int(i)]) == 10 else pad(topk_dict[int(i)]) for i in idx]
+            topk_labels = torch.stack(topk_labels, dim=0)[:, :args.topk].clone()
+
             # warm-up learning rate
             self.warmup_learning_rate(
                 epoch, idx, len(train_loader), optimizer)
@@ -269,7 +274,7 @@ class ContrastTrainer(BaseTrainer):
             k, all_k = self._shuffle_bn(x2, model_ema)
 
             # gather labels of global batch in a node
-            all_k_labels = self._global_gather(batch_labels)
+            # all_k_labels = self._global_gather(batch_labels)
 
             # loss and metrics
             if args.jigsaw:
@@ -321,8 +326,8 @@ class ContrastTrainer(BaseTrainer):
                     update_acc = 0.5 * (accuracies[0] + accuracies[1])
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
-                elif args.sup_mode == 'supcon' or args.sup_mode == 'negboost':
-                    contrast_loss = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
+                elif args.sup_mode == 'supcon' or args.sup_mode == 'topkmask':
+                    contrast_loss = contrast(q, k, all_k=all_k, batch_labels=batch_labels, topk_labels=topk_labels)
 
                     online_logits = model.forward_online_clf(q)
                     clf_loss = criterion(online_logits, batch_labels.long())

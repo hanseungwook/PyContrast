@@ -54,7 +54,7 @@ class BaseMoCo(nn.Module):
 
         return out
     
-    def _compute_loss_with_labels(self, q, k, queue, batch_labels, queue_labels):
+    def _compute_loss_with_labels(self, q, k, queue, batch_labels, queue_labels, topk_labels):
         """
         Args:
           q: query/anchor feature
@@ -74,8 +74,12 @@ class BaseMoCo(nn.Module):
         exp_logits = torch.exp(logits)
 
         positives_mask = torch.eq(batch_labels, k_queue_labels.T).float().to(q.device)
-        negatives_mask = 1. - positives_mask
         num_positives_per_row = torch.sum(positives_mask, dim=1)
+
+        topk_mask = torch.eq(topk_labels.unsqueeze(-1).permute(1,2,0), k_queue_labels)
+        topk_mask = topk_mask.any(dim=0).float().to(q.device)
+        negatives_mask = 1. - positives_mask
+        negatives_mask = torch.stack([topk_mask, negatives_mask], dim=0).all(dim=0)
 
         denominator = torch.sum(exp_logits * negatives_mask, axis=1, keepdim=True) + torch.sum(exp_logits * positives_mask, axis=1, keepdim=True)
         log_probs = (logits - torch.log(denominator)) * positives_mask
@@ -100,13 +104,15 @@ class RGBMoCo(BaseMoCo):
         self.register_buffer('memory_labels', torch.randn(K, 1))
         self.memory = F.normalize(self.memory)
 
-    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, all_k_labels=None):
+    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, topk_labels=None):
         """
         Args:
           q: query on current node
           k: key on current node
           q_jig: jigsaw query
           all_k: gather of feats across nodes; otherwise use q
+          batch_labels: labels of the batch
+          topk_labels: topk predictions from a pre-trained classifier for each image in the batch (bs, k)
         """
         bsz = q.size(0)
         k = k.detach()
@@ -116,10 +122,10 @@ class RGBMoCo(BaseMoCo):
         
         if batch_labels is None:
             logits = self._compute_logit(q, k, queue)
-        # Using labels in supervised setting (SupCon)
+        # Using labels in supervised setting (SupCon) with topk masking
         else:
             queue_labels = self.memory_label.clone().detach()
-            logits = self._compute_logits_with_labels(q, k, queue, batch_labels, queue_labels)
+            logits = self._compute_loss_with_labels(q, k, queue, batch_labels, queue_labels, topk_labels)
 
         if q_jig is not None:
             logits_jig = self._compute_logit(q_jig, k, queue)
