@@ -27,6 +27,8 @@ class BaseOptions(object):
                             help='path to save model')
         parser.add_argument('--tb_path', type=str, default='./tb',
                             help='path to tensorboard')
+        parser.add_argument('--exp_name', type=str, default='SupConMocoV2',
+                            help='name of experiment')
 
         # basics
         parser.add_argument('--print_freq', type=int, default=10,
