@@ -325,7 +325,7 @@ class ContrastTrainer(BaseTrainer):
                 elif args.sup_mode == 'supcon' or args.sup_mode == 'negboost':
                     contrast_loss = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
 
-                    online_logits = model(q, mode=3)
+                    online_logits = model(x1, mode=3)
                     clf_loss = criterion(online_logits, batch_labels.squeeze().long())
                     accuracies = self._compute_accuracy(online_logits, batch_labels)
 
