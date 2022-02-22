@@ -89,7 +89,7 @@ def main():
         **kwargs
     )
 
-    executor.update_parameters(name=args.name)
+    executor.update_parameters(name=args.model_name)
 
     args.dist_url = get_init_file(args).as_uri()
     args.output_dir = args.job_dir
