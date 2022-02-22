@@ -62,7 +62,7 @@ def main():
     # else:
     #     raise NotImplementedError('Currently only DDP training')
 
-    args.job_dir = args.model_folder
+    args.job_dir = Path(args.model_folder)
 
     get_init_file(args)
 
