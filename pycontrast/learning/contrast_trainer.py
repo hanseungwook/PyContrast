@@ -255,8 +255,9 @@ class ContrastTrainer(BaseTrainer):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
-            batch_labels = data[2].float().cuda(args.gpu, non_blocking=True)
             bsz = inputs.size(0)
+
+            batch_labels = data[2].float().view(bsz, 1).cuda(args.gpu, non_blocking=True)
 
             # warm-up learning rate
             self.warmup_learning_rate(
