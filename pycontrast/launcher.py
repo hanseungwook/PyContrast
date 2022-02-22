@@ -38,7 +38,7 @@ class Trainer(object):
         job_env = submitit.JobEnvironment()
         self.args.output_dir = self.args.job_dir
         self.args.gpu = job_env.local_rank
-        self.args.rank = job_env.global_rank
+        self.args.rank = job_env.global_rank // self.args.ngpus
         self.args.world_size = job_env.num_tasks
         print(f"Process group: {job_env.num_tasks} tasks, rank: {job_env.global_rank}")
 
