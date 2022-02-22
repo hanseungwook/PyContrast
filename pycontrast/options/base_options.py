@@ -112,6 +112,12 @@ class BaseOptions(object):
                                  'N processes per node, which has N GPUs. This is the '
                                  'fastest way to use PyTorch for either single node or '
                                  'multi node data parallel training')
+        
+        # Slurm setting
+        parser.add_argument("--timeout", default=360, type=int, 
+                            help="Duration of the job")
+        parser.add_argument("--partition", default="el8", type=str, 
+                            help="Partition where to submit")   
 
         return parser
 
