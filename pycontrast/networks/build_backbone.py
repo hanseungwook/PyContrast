@@ -46,15 +46,17 @@ class RGBSingleHead(nn.Module):
         # mode --
         # 0: normal encoder,
         # 1: momentum encoder,
-        # 2: testing mode
+        # 2: testing mode,
+        # 3: online classifier mode
+
+        # Online classifier mode: assuming inputs are features, not images
+        if mode == 3:
+            return self.online_clf(x.detach())
+
         feat = self.encoder(x)
         if mode == 0 or mode == 1:
             feat = self.head(feat)
         return feat
-
-    def forward_online_clf(self, x):
-        return self.online_clf(x.detach())
-
 
 class RGBMultiHeads(RGBSingleHead):
     """RGB model with Multiple linear/mlp projection heads"""
