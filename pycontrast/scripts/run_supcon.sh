@@ -16,7 +16,7 @@ python \
       --cosine \
       --data_folder /gpfs/u/locker/200/CADS/datasets/ImageNet/ \
       --multiprocessing-distributed \
-      --world-size 1 \
+      --world-size 3 \
       --rank 0 \
       --num_workers 32 \
       --ngpus 6 \
