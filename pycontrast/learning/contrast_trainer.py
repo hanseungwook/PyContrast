@@ -332,8 +332,8 @@ class ContrastTrainer(BaseTrainer):
 
                     update_loss = contrast_loss
                     update_acc = accuracies
-                    update_loss_jig = torch.tensor([0.0])
-                    update_acc_jig = torch.tensor([0.0])
+                    update_loss_jig = torch.Tensor([0.0])
+                    update_acc_jig = torch.Tensor([0.0])
                 else:
                     output = contrast(q, k, all_k=all_k)
                     losses, accuracies = self._compute_loss_accuracy(
@@ -342,8 +342,8 @@ class ContrastTrainer(BaseTrainer):
                     loss = losses[0]
                     update_loss = losses[0]
                     update_acc = accuracies[0]
-                    update_loss_jig = torch.tensor([0.0])
-                    update_acc_jig = torch.tensor([0.0])
+                    update_loss_jig = torch.Tensor([0.0])
+                    update_acc_jig = torch.Tensor([0.0])
 
             # backward
             optimizer.zero_grad()
@@ -363,7 +363,7 @@ class ContrastTrainer(BaseTrainer):
             else:
                 acc_meter.update(update_acc[0], bsz)
                 
-            acc_jig_meter.update(update_acc_jig[0], bsz)
+            acc_jig_meter.update(update_acc_jig.item(), bsz)
 
             # update momentum encoder
             self.momentum_update(model.module, model_ema, args.alpha)
