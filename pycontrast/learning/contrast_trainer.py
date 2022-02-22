@@ -218,7 +218,7 @@ class ContrastTrainer(BaseTrainer):
 
         return losses, accuracies
     
-    def _compute_accuracy(logits, target):
+    def _compute_accuracy(self, logits, target):
         def acc(l, t):
             acc1 = accuracy(l, t)
             return acc1[0]
