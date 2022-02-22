@@ -1,0 +1,26 @@
+#!/bin/bash
+
+## User python environment
+HOME2=/gpfs/u/home/BNSS/BNSSsgwh
+PYTHON_VIRTUAL_ENVIRONMENT=pytorch1.7
+CONDA_ROOT=$HOME2/scratch/miniconda3
+
+## Activate WMLCE virtual environment 
+source ${CONDA_ROOT}/etc/profile.d/conda.sh
+conda activate $PYTHON_VIRTUAL_ENVIRONMENT
+ulimit -s unlimited
+
+python \
+      $HOME2/scratch/PyContrast/pycontrast/launcher.py \
+      --method MoCov2 \
+      --cosine \
+      --data_folder /gpfs/u/locker/200/CADS/datasets/ImageNet/train/ \
+      --multiprocessing-distributed \
+      --world-size 1 \
+      --rank 0 \
+      --model_path $HOME2/scratch/PyContrast/pycontrast/saved_models/ \
+      --tb_path $HOME2/scratch/PyContrast/pycontrast/logs/
+
+echo "Run completed at:- "
+date
+

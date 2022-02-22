@@ -24,7 +24,7 @@ class Trainer(object):
         import submitit
 
         self.args.dist_url = get_init_file(self.args).as_uri()
-        checkpoint_file = os.path.join(self.args.model_dir, "checkpoint.pth")
+        checkpoint_file = os.path.join(self.args.model_folder, "current.pth")
         if os.path.exists(checkpoint_file):
             self.args.resume = checkpoint_file
         print("Requeuing ", self.args)
@@ -62,8 +62,7 @@ def main():
     # else:
     #     raise NotImplementedError('Currently only DDP training')
 
-    args.model_dir = os.path.join(args.model_dir, args.exp_name)
-    args.job_dir = args.model_dir
+    args.job_dir = args.model_folder
 
     get_init_file(args)
 
@@ -71,7 +70,7 @@ def main():
     executor = submitit.AutoExecutor(folder=args.job_dir, slurm_max_num_timeout=30)
 
     num_gpus_per_node = args.ngpus
-    nodes = args.nodes
+    nodes = args.world_size
     timeout_min = args.timeout
     partition = args.partition
 
