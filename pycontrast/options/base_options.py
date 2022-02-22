@@ -105,6 +105,8 @@ class BaseOptions(object):
                             help='seed for initializing training. ')
         parser.add_argument('--gpu', default=None, type=int,
                             help='GPU id to use.')
+        parser.add_argument('--ngpus', default=6, type=int,
+                            help='number of gpus in a node')
         parser.add_argument('--multiprocessing-distributed', action='store_true',
                             help='Use multi-processing distributed training to launch '
                                  'N processes per node, which has N GPUs. This is the '

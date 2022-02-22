@@ -17,7 +17,7 @@ class Trainer(object):
     def __call__(self):
         import main_contrast
         self._setup_gpu_args()
-        main_contrast.main_worker(self.args.gpu, self.args.world_size, self.args)
+        main_contrast.main_worker(self.args.gpu, self.args.ngpus, self.args)
 
     def checkpoint(self):
         import os

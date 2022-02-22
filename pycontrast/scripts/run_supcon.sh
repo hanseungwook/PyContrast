@@ -18,10 +18,11 @@ python \
       --multiprocessing-distributed \
       --world-size 1 \
       --rank 0 \
-      --workers 16 \
+      --num_workers 32 \
       --ngpus 6 \
       --model_path $HOME2/scratch/PyContrast-SupCon/pycontrast/saved_models/ \
-      --tb_path $HOME2/scratch/PyContrast-SupCon/pycontrast/logs/
+      --tb_path $HOME2/scratch/PyContrast-SupCon/pycontrast/logs/ \
+      --sup_mode supcon
 
 echo "Run completed at:- "
 date
