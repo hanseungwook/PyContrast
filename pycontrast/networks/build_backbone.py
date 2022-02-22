@@ -46,11 +46,20 @@ class RGBSingleHead(nn.Module):
         # mode --
         # 0: normal encoder,
         # 1: momentum encoder,
-        # 2: testing mode
+        # 2: testing mode,
+        # 3: online classifier mode
         feat = self.encoder(x)
         if mode == 0 or mode == 1:
             feat = self.head(feat)
+        
+        elif mode == 3:
+            feat_proj = self.head(feat)
+            feat_clf = self.online_clf(feat.detach())
+
+            return feat_proj, feat_clf
+            
         return feat
+
 
     def forward_online_clf(self, x):
         return self.online_clf(x.detach())

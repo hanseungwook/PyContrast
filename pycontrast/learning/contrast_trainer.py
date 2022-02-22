@@ -251,16 +251,17 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
-        for idx, data, batch_labels in enumerate(train_loader):
+        for idx, data in enumerate(train_loader):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
-            batch_labels = batch_labels.float().cuda(args.gpu, non_blocking=True)
             bsz = inputs.size(0)
+            batch_idxs = data[1]
+            batch_labels = data[2].float().view(bsz, 1).cuda(args.gpu, non_blocking=True)
 
             # Get top k labels for masking
             pad = torch.nn.ConstantPad1d((0,1), -1)
-            topk_labels = [topk_dict[int(i)] if len(topk_dict[int(i)]) == 10 else pad(topk_dict[int(i)]) for i in idx]
+            topk_labels = [topk_dict[int(i)] if len(topk_dict[int(i)]) == 10 else pad(topk_dict[int(i)]) for i in batch_idxs]
             topk_labels = torch.stack(topk_labels, dim=0)[:, :args.topk].clone()
 
             # warm-up learning rate
@@ -310,7 +311,7 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = losses[1]
                     update_acc_jig = accuracies[1]
             else:
-                q = model(x1)
+                q, online_logits = model(x1, mode=3)
                 if args.modal == 'CMC':
                     q1, q2 = torch.chunk(q, 2, dim=1)
                     k1, k2 = torch.chunk(k, 2, dim=1)
@@ -327,18 +328,17 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
                 elif args.sup_mode == 'supcon' or args.sup_mode == 'topkmask':
-                    contrast_loss = contrast(q, k, all_k=all_k, batch_labels=batch_labels, topk_labels=topk_labels)
+                    contrast_loss, _ = contrast(q, k, all_k=all_k, batch_labels=batch_labels, topk_labels=topk_labels)
 
-                    online_logits = model.forward_online_clf(q)
-                    clf_loss = criterion(online_logits, batch_labels.long())
+                    clf_loss = criterion(online_logits, batch_labels.squeeze().long())
                     accuracies = self._compute_accuracy(online_logits, batch_labels)
 
                     loss = contrast_loss + clf_loss
 
                     update_loss = contrast_loss
-                    update_acc = torch.mean(accuracies)
-                    update_loss_jig = torch.tensor([0.0])
-                    update_acc_jig = torch.tensor([0.0])
+                    update_acc = accuracies
+                    update_loss_jig = torch.Tensor([0.0])
+                    update_acc_jig = torch.Tensor([0.0])
                 else:
                     output = contrast(q, k, all_k=all_k)
                     losses, accuracies = self._compute_loss_accuracy(
@@ -364,11 +364,11 @@ class ContrastTrainer(BaseTrainer):
             loss_jig_meter.update(update_loss_jig.item(), bsz)
 
             if args.sup_mode == 'supcon' or args.sup_mode == 'negboost':
-                acc_meter.update(update_acc, bsz)
+                acc_meter.update(update_acc.item(), bsz)
             else:
                 acc_meter.update(update_acc[0], bsz)
                 
-            acc_jig_meter.update(update_acc_jig[0], bsz)
+            acc_jig_meter.update(update_acc_jig.item(), bsz)
 
             # update momentum encoder
             self.momentum_update(model.module, model_ema, args.alpha)

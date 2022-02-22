@@ -38,9 +38,18 @@ class BaseTrainer(object):
             if self.args.multiprocessing_distributed:
                 self.args.rank = self.args.rank * ngpus_per_node + gpu
             os.environ['PYTHONWARNINGS'] = 'ignore:semaphore_tracker:UserWarning'
+
+            if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
+                self.args.rank = int(os.environ["RANK"])
+                self.args.world_size = int(os.environ['WORLD_SIZE'])
+                self.args.gpu = int(os.environ['LOCAL_RANK'])
+            elif 'SLURM_PROCID' in os.environ:
+                self.args.rank = int(os.environ['SLURM_PROCID'])
+                self.args.gpu = self.args.rank % torch.cuda.device_count()
             dist.init_process_group(
                 backend=self.args.dist_backend, init_method=self.args.dist_url,
                 world_size=self.args.world_size, rank=self.args.rank)
+            torch.distributed.barrier()
 
         # setup local group on each node, for ShuffleBN
         local_groups = []
@@ -51,7 +60,7 @@ class BaseTrainer(object):
             local_groups.append(gp)
 
         local_group = local_groups[self.args.rank // ngpus_per_node]
-        if self.args.local_rank == 0:
+        if self.args.local_rank >= 0:
             print("node_rank:", self.args.node_rank)
             print("local_center:", self.args.local_center)
             print("local group size:", dist.get_world_size(local_group))
