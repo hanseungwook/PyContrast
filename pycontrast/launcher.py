@@ -53,7 +53,6 @@ def get_init_file(args):
 def main():
     args = TrainOptions().parse()
 
-    # args.distributed = args.world_size > 1 or args.multiprocessing_distributed
     # ngpus_per_node = torch.cuda.device_count()
 
     # if args.multiprocessing_distributed:
@@ -73,6 +72,9 @@ def main():
     nodes = args.world_size
     timeout_min = args.timeout
     partition = args.partition
+
+    args.distributed = args.world_size > 1 or args.multiprocessing_distributed
+    args.world_size = num_gpus_per_node * args.world_size
 
     kwargs = {'slurm_gres': f'gpu:{num_gpus_per_node}',}
 
