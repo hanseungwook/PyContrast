@@ -14,7 +14,7 @@ python \
       $HOME2/scratch/PyContrast-SupCon/pycontrast/launcher.py \
       --method MoCov2 \
       --cosine \
-      --data_folder /gpfs/u/locker/200/CADS/datasets/ImageNet/train/ \
+      --data_folder /gpfs/u/locker/200/CADS/datasets/ImageNet/ \
       --multiprocessing-distributed \
       --world-size 1 \
       --rank 0 \
