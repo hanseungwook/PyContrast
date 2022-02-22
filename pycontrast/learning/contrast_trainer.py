@@ -223,7 +223,7 @@ class ContrastTrainer(BaseTrainer):
             acc1 = accuracy(l, t)
             return acc1[0]
         
-        accuracies = [acc(logit, target) for logit in logits]
+        accuracies = acc(logits, target)
 
         return accuracies
 
@@ -332,7 +332,7 @@ class ContrastTrainer(BaseTrainer):
                     loss = contrast_loss + clf_loss
 
                     update_loss = contrast_loss
-                    update_acc = torch.mean(accuracies)
+                    update_acc = accuracies
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
                 else:
