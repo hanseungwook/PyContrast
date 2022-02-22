@@ -3,6 +3,7 @@ tmp.py
 data/
 tb/
 save/
+imagenet_resnet50_top10.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
