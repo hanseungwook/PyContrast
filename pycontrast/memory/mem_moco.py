@@ -70,7 +70,8 @@ class BaseMoCo(nn.Module):
 
         logits = torch.mm(q, k_queue.transpose(1, 0))
         logits = torch.div(logits, self.T)
-        logits = torch.subtract(logits, torch.max(logits.detach(), dim=1, keepdim=True))
+        # logits = torch.subtract(logits, torch.max(logits.detach(), dim=1, keepdim=True))
+        logits = logits - torch.max(logits.detach(), dim=1, keepdim=True)
         exp_logits = torch.exp(logits)
 
         positives_mask = torch.eq(batch_labels, k_queue_labels.T).float().to(q.device)
