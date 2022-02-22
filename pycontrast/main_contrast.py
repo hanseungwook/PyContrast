@@ -76,7 +76,3 @@ def main_worker(gpu, ngpus_per_node, args):
 
         # save model
         trainer.save(model, model_ema, contrast, optimizer, epoch)
-
-
-if __name__ == '__main__':
-    main()

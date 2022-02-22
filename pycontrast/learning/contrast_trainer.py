@@ -251,7 +251,7 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
-        for idx, data, batch_labels in enumerate(train_loader):
+        for idx, (data, batch_labels) in enumerate(train_loader):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
@@ -404,7 +404,7 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
-        for idx, data in enumerate(train_loader):
+        for idx, (data, batch_labels) in enumerate(train_loader):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
