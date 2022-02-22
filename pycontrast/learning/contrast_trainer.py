@@ -306,7 +306,7 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = losses[1]
                     update_acc_jig = accuracies[1]
             else:
-                q = model(x1)
+                q, online_logits = model(x1)
                 if args.modal == 'CMC':
                     q1, q2 = torch.chunk(q, 2, dim=1)
                     k1, k2 = torch.chunk(k, 2, dim=1)
@@ -325,7 +325,6 @@ class ContrastTrainer(BaseTrainer):
                 elif args.sup_mode == 'supcon' or args.sup_mode == 'negboost':
                     contrast_loss, _ = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
 
-                    online_logits = model(x1, mode=3)
                     clf_loss = criterion(online_logits, batch_labels.squeeze().long())
                     accuracies = self._compute_accuracy(online_logits, batch_labels)
 

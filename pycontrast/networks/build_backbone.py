@@ -48,15 +48,16 @@ class RGBSingleHead(nn.Module):
         # 1: momentum encoder,
         # 2: testing mode,
         # 3: online classifier mode
-
-        # Online classifier mode: assuming inputs are features, not images
-        if mode == 3:
-            feat = self.encoder(x.detach())
-            return self.online_clf(feat)
-
         feat = self.encoder(x)
         if mode == 0 or mode == 1:
             feat = self.head(feat)
+        
+        elif mode == 3:
+            feat_proj = self.head(feat)
+            feat_clf = self.online_clf(feat.detach())
+
+            return feat_proj, feat_clf
+            
         return feat
 
 class RGBMultiHeads(RGBSingleHead):
