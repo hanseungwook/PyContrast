@@ -31,7 +31,7 @@ class ImageFolderInstance(datasets.ImageFolder):
             img = self.transform(image)
             if self.two_crop:
                 img2 = self.transform(image)
-                img = torch.cat([img, img2], dim=0)
+                img = torch.cat([img, img2], dim=1)
         else:
             img = image
 
