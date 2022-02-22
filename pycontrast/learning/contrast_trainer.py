@@ -251,7 +251,7 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
-        for idx, (data, batch_labels) in enumerate(train_loader):
+        for idx, (data, batch_idxs, batch_labels) in enumerate(train_loader):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
@@ -404,7 +404,7 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
-        for idx, (data, batch_labels) in enumerate(train_loader):
+        for idx, (data, batch_idxs, batch_labels) in enumerate(train_loader):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
@@ -520,4 +520,4 @@ class ContrastTrainer(BaseTrainer):
     def momentum_update(model, model_ema, m):
         """ model_ema = m * model_ema + (1 - m) model """
         for p1, p2 in zip(model.parameters(), model_ema.parameters()):
-            p2.data.mul_(m).add_(1 - m, p1.detach().data)
+            p2.data.mul_(m).add_(p1.detach().data, alpha=(1 - m))
