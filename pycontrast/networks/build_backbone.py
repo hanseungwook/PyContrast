@@ -51,7 +51,8 @@ class RGBSingleHead(nn.Module):
 
         # Online classifier mode: assuming inputs are features, not images
         if mode == 3:
-            return self.online_clf(x.detach())
+            feat = self.encoder(x.detach())
+            return self.online_clf(feat)
 
         feat = self.encoder(x)
         if mode == 0 or mode == 1:
