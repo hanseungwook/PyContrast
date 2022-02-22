@@ -323,7 +323,7 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
                 elif args.sup_mode == 'supcon' or args.sup_mode == 'negboost':
-                    contrast_loss = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
+                    contrast_loss, _ = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
 
                     online_logits = model(x1, mode=3)
                     clf_loss = criterion(online_logits, batch_labels.squeeze().long())
