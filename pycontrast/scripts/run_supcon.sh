@@ -18,6 +18,8 @@ python \
       --multiprocessing-distributed \
       --world-size 1 \
       --rank 0 \
+      --workers 16 \
+      --ngpus 6 \
       --model_path $HOME2/scratch/PyContrast-SupCon/pycontrast/saved_models/ \
       --tb_path $HOME2/scratch/PyContrast-SupCon/pycontrast/logs/
 
