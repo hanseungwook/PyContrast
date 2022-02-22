@@ -22,6 +22,7 @@ python \
       --ngpus 6 \
       --model_path $HOME2/scratch/PyContrast-TopkMask/pycontrast/saved_models/ \
       --tb_path $HOME2/scratch/PyContrast-TopkMask/pycontrast/logs/ \
+      --topk_path $HOME2/scratch/PyContrast-TopkMask/pycontrast/imagenet_resnet50_top10.pkl \
       --sup_mode supcon
 
 echo "Run completed at:- "

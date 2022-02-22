@@ -218,12 +218,12 @@ class ContrastTrainer(BaseTrainer):
 
         return losses, accuracies
     
-    def _compute_accuracy(logits, target):
+    def _compute_accuracy(self, logits, target):
         def acc(l, t):
             acc1 = accuracy(l, t)
             return acc1[0]
         
-        accuracies = [acc(logit, target) for logit in logits]
+        accuracies = acc(logits, target)
 
         return accuracies
 
@@ -525,4 +525,4 @@ class ContrastTrainer(BaseTrainer):
     def momentum_update(model, model_ema, m):
         """ model_ema = m * model_ema + (1 - m) model """
         for p1, p2 in zip(model.parameters(), model_ema.parameters()):
-            p2.data.mul_(m).add_(1 - m, p1.detach().data)
+            p2.data.mul_(m).add_(p1.detach().data, alpha=(1 - m))
