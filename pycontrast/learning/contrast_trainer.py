@@ -251,11 +251,11 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
-        for idx, (data, batch_idxs, batch_labels) in enumerate(train_loader):
+        for idx, data in enumerate(train_loader):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
-            batch_labels = batch_labels.float().cuda(args.gpu, non_blocking=True)
+            batch_labels = data[2].float().cuda(args.gpu, non_blocking=True)
             bsz = inputs.size(0)
 
             # warm-up learning rate
@@ -404,7 +404,7 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
-        for idx, (data, batch_idxs, batch_labels) in enumerate(train_loader):
+        for idx, data in enumerate(train_loader):
             data_time.update(time.time() - end)
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
