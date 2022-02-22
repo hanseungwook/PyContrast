@@ -359,7 +359,7 @@ class ContrastTrainer(BaseTrainer):
             loss_jig_meter.update(update_loss_jig.item(), bsz)
 
             if args.sup_mode == 'supcon' or args.sup_mode == 'negboost':
-                acc_meter.update(update_acc, bsz)
+                acc_meter.update(update_acc.item(), bsz)
             else:
                 acc_meter.update(update_acc[0], bsz)
                 
