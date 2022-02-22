@@ -60,7 +60,7 @@ class BaseTrainer(object):
             local_groups.append(gp)
 
         local_group = local_groups[self.args.rank // ngpus_per_node]
-        if self.args.local_rank == 0:
+        if self.args.local_rank >= 0:
             print("node_rank:", self.args.node_rank)
             print("local_center:", self.args.local_center)
             print("local group size:", dist.get_world_size(local_group))
