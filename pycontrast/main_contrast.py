@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.utils.data.distributed
 import torch.multiprocessing as mp
 
-from options.train_options import TrainOptions
+# from options.train_options import TrainOptions
 from learning.contrast_trainer import ContrastTrainer
 from networks.build_backbone import build_model
 from datasets.util import build_contrast_loader
