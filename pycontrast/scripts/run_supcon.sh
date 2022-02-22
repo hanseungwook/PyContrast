@@ -11,15 +11,15 @@ conda activate $PYTHON_VIRTUAL_ENVIRONMENT
 ulimit -s unlimited
 
 python \
-      $HOME2/scratch/PyContrast/pycontrast/launcher.py \
+      $HOME2/scratch/PyContrast-SupCon/pycontrast/launcher.py \
       --method MoCov2 \
       --cosine \
       --data_folder /gpfs/u/locker/200/CADS/datasets/ImageNet/train/ \
       --multiprocessing-distributed \
       --world-size 1 \
       --rank 0 \
-      --model_path $HOME2/scratch/PyContrast/pycontrast/saved_models/ \
-      --tb_path $HOME2/scratch/PyContrast/pycontrast/logs/
+      --model_path $HOME2/scratch/PyContrast-SupCon/pycontrast/saved_models/ \
+      --tb_path $HOME2/scratch/PyContrast-SupCon/pycontrast/logs/
 
 echo "Run completed at:- "
 date
