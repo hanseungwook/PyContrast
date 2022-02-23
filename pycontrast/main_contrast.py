@@ -42,6 +42,7 @@ def main_worker(gpu, ngpus_per_node, args):
         build_contrast_loader(args, ngpus_per_node)
 
     # load top k predictions from a pre-trained classiifer
+    print('Loading Top k dict', flush=True)
     topk_dict = load_topk(args)
 
     # build memory
