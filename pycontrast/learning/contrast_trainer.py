@@ -262,7 +262,7 @@ class ContrastTrainer(BaseTrainer):
             # Get top k labels for masking
             pad = torch.nn.ConstantPad1d((0,1), -1)
             topk_labels = [topk_dict[int(i)] if len(topk_dict[int(i)]) == 10 else pad(topk_dict[int(i)]) for i in batch_idxs]
-            topk_labels = torch.stack(topk_labels, dim=0)[:, :args.topk].clone()
+            topk_labels = torch.stack(topk_labels, dim=0)[:, :args.topk].clone().cuda(args.gpu, non_blocking=True)
 
             # warm-up learning rate
             self.warmup_learning_rate(
