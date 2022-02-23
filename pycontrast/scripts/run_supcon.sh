@@ -22,7 +22,9 @@ python \
       --ngpus 6 \
       --model_path $HOME2/scratch/PyContrast-SupCon/pycontrast/saved_models/ \
       --tb_path $HOME2/scratch/PyContrast-SupCon/pycontrast/logs/ \
-      --sup_mode supcon
+      --sup_mode supcon \
+      --save_freq 5 \
+      --resume $HOME2/scratch/PyContrast-SupCon/pycontrast/saved_models/MoCov2_resnet50_RGB_Jig_False_moco_aug_B_mlp_0.2_cosine/current.pth
 
 echo "Run completed at:- "
 date

@@ -251,6 +251,7 @@ class ContrastTrainer(BaseTrainer):
         acc_jig_meter = AverageMeter()
 
         end = time.time()
+        print('Starting epoch', flush=True)
         for idx, data in enumerate(train_loader):
             data_time.update(time.time() - end)
 

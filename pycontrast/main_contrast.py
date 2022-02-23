@@ -64,6 +64,8 @@ def main_worker(gpu, ngpus_per_node, args):
     # init tensorboard logger
     trainer.init_tensorboard_logger()
 
+    print('Starting training', flush=True)
+
     for epoch in range(start_epoch, args.epochs + 1):
         train_sampler.set_epoch(epoch)
         trainer.adjust_learning_rate(optimizer, epoch)
