@@ -11,12 +11,12 @@ conda activate $PYTHON_VIRTUAL_ENVIRONMENT
 ulimit -s unlimited
 
 python \
-      $HOME2/scratch/PyContrast-SupCon/pycontrast/launcher.py \
+      $HOME2/scratch/PyContrast-TopkMask/pycontrast/launcher.py \
       --method MoCov2 \
       --cosine \
       --data_folder /gpfs/u/locker/200/CADS/datasets/ImageNet/ \
       --multiprocessing-distributed \
-      --world-size 3 \
+      --world-size 1 \
       --rank 0 \
       --num_workers 32 \
       --ngpus 6 \
