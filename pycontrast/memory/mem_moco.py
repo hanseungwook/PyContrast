@@ -75,8 +75,8 @@ class BaseMoCo(nn.Module):
 
         positives_mask = torch.eq(batch_labels, k_queue_labels.T).float().to(q.device)
         num_positives_per_row = torch.sum(positives_mask, dim=1)
-
-        topk_mask = torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), k_queue_labels)
+        
+        topk_mask = torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), k_queue_labels.permute(1,0))
         topk_mask = topk_mask.any(dim=0).float().to(q.device)
         negatives_mask = 1. - positives_mask
         negatives_mask = torch.stack([topk_mask, negatives_mask], dim=0).all(dim=0)
