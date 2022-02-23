@@ -327,7 +327,7 @@ class ContrastTrainer(BaseTrainer):
                     update_acc = 0.5 * (accuracies[0] + accuracies[1])
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
-                elif args.sup_mode == 'supcon' or args.sup_mode == 'topkmask':
+                elif args.sup_mode == 'supcon' or args.sup_mode == 'topk-mask':
                     contrast_loss, _ = contrast(q, k, all_k=all_k, batch_labels=batch_labels, topk_labels=topk_labels)
 
                     clf_loss = criterion(online_logits, batch_labels.squeeze().long())
@@ -363,7 +363,7 @@ class ContrastTrainer(BaseTrainer):
             loss_meter.update(update_loss.item(), bsz)
             loss_jig_meter.update(update_loss_jig.item(), bsz)
 
-            if args.sup_mode == 'supcon' or args.sup_mode == 'negboost':
+            if args.sup_mode == 'supcon' or args.sup_mode == 'topk-mask':
                 acc_meter.update(update_acc.item(), bsz)
             else:
                 acc_meter.update(update_acc[0], bsz)
