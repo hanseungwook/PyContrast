@@ -108,7 +108,7 @@ class ContrastTrainer(BaseTrainer):
     def save(self, model, model_ema, contrast, optimizer, epoch):
         """save model to checkpoint"""
         args = self.args
-        if args.local_rank == 0:
+        if args.local_rank == 0 and args.node_rank == 0:
             # saving the model to each instance
             print('==> Saving...')
             state = {
