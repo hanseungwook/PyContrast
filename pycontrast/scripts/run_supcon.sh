@@ -23,7 +23,7 @@ python \
       --model_path $HOME2/scratch/PyContrast-TopkMask/pycontrast/saved_models/ \
       --tb_path $HOME2/scratch/PyContrast-TopkMask/pycontrast/logs/ \
       --topk_path $HOME2/scratch/PyContrast-TopkMask/pycontrast/imagenet_resnet50_top10.pkl \
-      --sup_mode supcon
+      --sup_mode topk-mask
 
 echo "Run completed at:- "
 date
