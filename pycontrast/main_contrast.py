@@ -73,11 +73,13 @@ def main_worker(gpu, ngpus_per_node, args):
         trainer.adjust_learning_rate(optimizer, epoch)
 
         if epoch == 1:
-            outs = trainer.train(epoch, train_loader, model, model_ema,
-                                contrast, criterion, optimizer, topk_dict)
-        else:
+            print('Training with SupCon while building memory in first epoch', flush=True)
             outs = trainer.train(epoch, train_loader, model, model_ema,
                                 contrast, criterion, optimizer)
+        else:
+            outs = trainer.train(epoch, train_loader, model, model_ema,
+                                contrast, criterion, optimizer, topk_dict)
+                                
         # log to tensorbard
         trainer.logging(epoch, outs, optimizer.param_groups[0]['lr'])
 
