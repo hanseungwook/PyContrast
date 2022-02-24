@@ -133,7 +133,7 @@ class RGBMoCo(BaseMoCo):
         if batch_labels is None:
             self._update_memory(all_k, self.memory)
         else:
-            self._update_memory(all_k, self.memory, self.memory_labels)
+            self._update_memory(all_k, self.memory, all_k_labels, self.memory_labels)
 
         self._update_pointer(all_k.size(0))
 

@@ -1,3 +1,5 @@
+logs/
+saved_models/
 .idea/
 tmp.py
 data/
