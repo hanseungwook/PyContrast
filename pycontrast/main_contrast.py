@@ -72,9 +72,12 @@ def main_worker(gpu, ngpus_per_node, args):
         train_sampler.set_epoch(epoch)
         trainer.adjust_learning_rate(optimizer, epoch)
 
-        outs = trainer.train(epoch, train_loader, model, model_ema,
-                             contrast, criterion, optimizer, topk_dict)
-
+        if epoch == 1:
+            outs = trainer.train(epoch, train_loader, model, model_ema,
+                                contrast, criterion, optimizer, topk_dict)
+        else:
+            outs = trainer.train(epoch, train_loader, model, model_ema,
+                                contrast, criterion, optimizer)
         # log to tensorbard
         trainer.logging(epoch, outs, optimizer.param_groups[0]['lr'])
 
