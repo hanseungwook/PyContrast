@@ -78,8 +78,9 @@ class BaseMoCo(nn.Module):
 
         negatives_mask = 1. - positives_mask
         if topk_labels is None:
-            topk_mask = torch.stack([torch.eq(topk.unsqueeze(-1), k_queue_labels.permute(1,0)) for topk in torch.unbind(topk_labels, dim=1)], dim=0)
-            assert (topk_mask == torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), k_queue_labels.permute(1,0))).all()
+            topk_mask = torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), k_queue_labels.permute(1,0))
+            # topk_mask = torch.stack([torch.eq(topk.unsqueeze(-1), k_queue_labels.permute(1,0)) for topk in torch.unbind(topk_labels, dim=1)], dim=0)
+            # assert (topk_mask == torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), k_queue_labels.permute(1,0))).all()
             topk_mask = topk_mask.any(dim=0).float().cuda()
             negatives_mask = torch.stack([topk_mask, negatives_mask], dim=0).bool().all(dim=0).float()
 
