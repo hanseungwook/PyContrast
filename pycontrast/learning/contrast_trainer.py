@@ -275,7 +275,7 @@ class ContrastTrainer(BaseTrainer):
             k, all_k = self._shuffle_bn(x2, model_ema)
 
             # gather labels of global batch in a node
-            # all_k_labels = self._global_gather(batch_labels)
+            all_k_labels = self._global_gather(batch_labels)
 
             # loss and metrics
             if args.jigsaw:
@@ -328,7 +328,7 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
                 elif args.sup_mode == 'supcon' or args.sup_mode == 'topk-mask':
-                    contrast_loss, _ = contrast(q, k, all_k=all_k, batch_labels=batch_labels, topk_labels=topk_labels)
+                    contrast_loss, _ = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels, topk_labels=topk_labels)
 
                     clf_loss = criterion(online_logits, batch_labels.squeeze().long())
                     accuracies = self._compute_accuracy(online_logits, batch_labels)

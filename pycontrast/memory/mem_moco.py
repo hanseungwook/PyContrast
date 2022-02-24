@@ -104,7 +104,7 @@ class RGBMoCo(BaseMoCo):
         self.register_buffer('memory_labels', torch.randn(K, 1))
         self.memory = F.normalize(self.memory)
 
-    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, topk_labels=None):
+    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, all_k_labels=None, topk_labels=None):
         """
         Args:
           q: query on current node
@@ -138,7 +138,7 @@ class RGBMoCo(BaseMoCo):
         if batch_labels is None:
             self._update_memory(all_k, self.memory)
         else:
-            self._update_memory(all_k, self.memory, self.memory_labels)
+            self._update_memory(all_k, self.memory, all_k_labels, self.memory_labels)
 
         self._update_pointer(all_k.size(0))
 
