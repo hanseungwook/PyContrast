@@ -77,7 +77,7 @@ class BaseMoCo(nn.Module):
         num_positives_per_row = torch.sum(positives_mask, dim=1)
 
         negatives_mask = 1. - positives_mask
-        if topk_labels is None:
+        if topk_labels is not None:
             topk_mask = torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), k_queue_labels.permute(1,0))
             # topk_mask = torch.stack([torch.eq(topk.unsqueeze(-1), k_queue_labels.permute(1,0)) for topk in torch.unbind(topk_labels, dim=1)], dim=0)
             # assert (topk_mask == torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), k_queue_labels.permute(1,0))).all()
