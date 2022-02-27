@@ -12,9 +12,9 @@ class BaseOptions(object):
         self.override_dict = {
             'InsDis':  ['RGB', False, 'bank', 'A', 'linear', 0.07],
             'CMC':     ['CMC', False, 'bank', 'C', 'linear', 0.07],
-            'MoCo':    ['RGB', False, 'moco', 'A', 'linear', 0.07],
+            'MoCo':    ['RGB', False, 'moco', 'A', 'linear', 0.07], 
             'PIRL':    ['RGB', True,  'bank', 'A', 'linear', 0.07],
-            'MoCov2':  ['RGB', False, 'moco', 'B', 'mlp',    0.2],
+            'MoCov2':  ['RGB', False, 'moco', 'B', 'mlp',    0.2], # modal, jigsaw, mem, aug, head, nce_t
             'CMCv2':   ['CMC', False, 'moco', 'E', 'mlp',    0.2],
             'InfoMin': ['RGB', True,  'moco', 'D', 'mlp',    0.15],
         }
@@ -27,6 +27,8 @@ class BaseOptions(object):
                             help='path to save model')
         parser.add_argument('--tb_path', type=str, default='./tb',
                             help='path to tensorboard')
+        parser.add_argument('--exp_name', type=str, default='SupConMocoV2',
+                            help='name of experiment')
 
         # basics
         parser.add_argument('--print_freq', type=int, default=10,
@@ -103,11 +105,19 @@ class BaseOptions(object):
                             help='seed for initializing training. ')
         parser.add_argument('--gpu', default=None, type=int,
                             help='GPU id to use.')
+        parser.add_argument('--ngpus', default=6, type=int,
+                            help='number of gpus in a node')
         parser.add_argument('--multiprocessing-distributed', action='store_true',
                             help='Use multi-processing distributed training to launch '
                                  'N processes per node, which has N GPUs. This is the '
                                  'fastest way to use PyTorch for either single node or '
                                  'multi node data parallel training')
+        
+        # Slurm setting
+        parser.add_argument("--timeout", default=360, type=int, 
+                            help="Duration of the job")
+        parser.add_argument("--partition", default="el8", type=str, 
+                            help="Partition where to submit")   
 
         return parser
 

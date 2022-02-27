@@ -42,4 +42,4 @@ class ImageFolderInstance(datasets.ImageFolder):
         if self.use_jigsaw:
             return img, index, jigsaw_image
         else:
-            return img, index
+            return img, index, target

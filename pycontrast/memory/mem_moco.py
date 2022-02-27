@@ -14,7 +14,7 @@ class BaseMoCo(nn.Module):
     def _update_pointer(self, bsz):
         self.index = (self.index + bsz) % self.K
 
-    def _update_memory(self, k, queue):
+    def _update_memory(self, k, queue, k_labels, queue_labels):
         """
         Args:
           k: key feature
@@ -25,6 +25,9 @@ class BaseMoCo(nn.Module):
             out_ids = torch.arange(num_neg).cuda()
             out_ids = torch.fmod(out_ids + self.index, self.K).long()
             queue.index_copy_(0, out_ids, k)
+
+            if k_labels is not None and queue_labels is not None:
+                queue_labels.index_copy_(0, out_ids, k_labels)
 
     def _compute_logit(self, q, k, queue):
         """
@@ -47,7 +50,33 @@ class BaseMoCo(nn.Module):
         out = out.squeeze().contiguous()
 
         return out
+    
+    def _compute_logits_with_labels(self, q, k, queue, batch_labels, queue_labels):
+        """
+        Args:
+          q: query/anchor feature
+          k: key feature
+          queue: memory buffer
+          batch_labels: labels of q
+          queue_labels: labels of memory buffer
+        """
+        # exp pos logit
+        bsz = q.shape[0]
+        pos = torch.bmm(q.view(bsz, 1, -1), k.view(bsz, -1, 1))
+        pos = pos.view(bsz, 1)
+        pos = torch.exp(torch.div(pos, self.T))
 
+        neg_mask = torch.neq(batch_labels, queue_labels.transpose(1,0)).float().cuda(non_blocking=True)
+        
+        # exp neg logit
+        neg = torch.mm(queue, q.transpose(1, 0))
+        neg = neg.transpose(0, 1)
+        neg = torch.exp(torch.div(neg, self.T)) * neg_mask
+
+        out = torch.cat((pos, neg), dim=1)
+        out = out.squeeze().contiguous()
+
+        return out
 
 class RGBMoCo(BaseMoCo):
     """Single Modal (e.g., RGB) MoCo-style cache"""
@@ -55,9 +84,10 @@ class RGBMoCo(BaseMoCo):
         super(RGBMoCo, self).__init__(K, T)
         # create memory queue
         self.register_buffer('memory', torch.randn(K, n_dim))
+        self.register_buffer('memory_labels', torch.randn(K, 1))
         self.memory = F.normalize(self.memory)
 
-    def forward(self, q, k, q_jig=None, all_k=None):
+    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, all_k_labels=None):
         """
         Args:
           q: query on current node
@@ -70,16 +100,22 @@ class RGBMoCo(BaseMoCo):
 
         # compute logit
         queue = self.memory.clone().detach()
-        logits = self._compute_logit(q, k, queue)
-        if q_jig is not None:
-            logits_jig = self._compute_logit(q_jig, k, queue)
+
+        if batch_labels is not None:
+            queue_labels = self.memory_labels.clone().detach()
+            logits = self._compute_logits_with_labels(q, k, queue, batch_labels, queue_labels)
+        
+        else:
+            logits = self._compute_logit(q, k, queue, batch_labels=batch_labels)
+            if q_jig is not None:
+                logits_jig = self._compute_logit(q_jig, k, queue)
 
         # set label
         labels = torch.zeros(bsz, dtype=torch.long).cuda()
 
         # update memory
         all_k = all_k if all_k is not None else k
-        self._update_memory(all_k, self.memory)
+        self._update_memory(all_k, self.memory, all_k_labels, self.memory_labels)
         self._update_pointer(all_k.size(0))
 
         if q_jig is not None:

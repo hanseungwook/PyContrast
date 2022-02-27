@@ -36,3 +36,22 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
+class InfoNCE(nn.Module):
+    """Supervised Contrastive Learning: https://arxiv.org/pdf/2004.11362.pdf.
+    It also supports the unsupervised contrastive loss in SimCLR"""
+    def __init__(self):
+        super(InfoNCE, self).__init__()
+
+    def forward(self, logits, labels):
+        """Compute loss for model. If both `labels` and `mask` are None,
+        it degenerates to SimCLR unsupervised loss:
+        https://arxiv.org/pdf/2002.05709.pdf
+        Args:
+            logits: logits of the shape [bsz, (num_pos_views + num_neg_views)] (positive view is the first element in dim 1)
+            labels: ground truth of shape [bsz, 1].
+        Returns:
+            A loss scalar.
+        """
+        loss = logits[:, 0] - logits.sum(dim=1)
+
+        return loss.mean()

@@ -10,6 +10,7 @@ import torch.multiprocessing as mp
 
 from options.train_options import TrainOptions
 from learning.contrast_trainer import ContrastTrainer
+from learning.util import InfoNCE
 from networks.build_backbone import build_model
 from datasets.util import build_contrast_loader
 from memory.build_memory import build_mem
@@ -46,7 +47,7 @@ def main_worker(gpu, ngpus_per_node, args):
     contrast.cuda()
 
     # build criterion and optimizer
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = InfoNCE().cuda() if args.sup_mode == 'mask' else nn.CrossEntropyLoss().cuda()
     optimizer = torch.optim.SGD(model.parameters(),
                                 lr=args.learning_rate,
                                 momentum=args.momentum,

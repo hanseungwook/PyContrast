@@ -30,6 +30,8 @@ class RGBSingleHead(nn.Module):
         else:
             raise NotImplementedError(
                 'head not supported: {}'.format(head))
+        
+        self.online_clf = nn.Linear(dim_in, 1000)
 
     @staticmethod
     def _parse_width(name):
@@ -48,6 +50,11 @@ class RGBSingleHead(nn.Module):
         feat = self.encoder(x)
         if mode == 0 or mode == 1:
             feat = self.head(feat)
+        
+            feat_clf = self.online_clf(feat.detach())
+
+            return feat, feat_clf
+            
         return feat
 
 

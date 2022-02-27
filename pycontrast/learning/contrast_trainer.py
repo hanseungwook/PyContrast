@@ -200,20 +200,25 @@ class ContrastTrainer(BaseTrainer):
         return k, all_k
 
     @staticmethod
-    def _compute_loss_accuracy(logits, target, criterion):
+    def _compute_loss_accuracy(logits, target, criterion, logits_online=None):
         """
         Args:
           logits: a list of logits, each with a contrastive task
           target: contrastive learning target
           criterion: typically nn.CrossEntropyLoss
         """
-        losses = [criterion(logit, target) for logit in logits]
+        # losses = [criterion(logit, target) for logit in logits]
+        losses = [criterion(logits, target)]
 
         def acc(l, t):
             acc1 = accuracy(l, t)
             return acc1[0]
 
-        accuracies = [acc(logit, target) for logit in logits]
+        # accuracies = [acc(logit, target) for logit in logits]
+        if logits_online:
+            accuracies = [acc(logits_online, target)]
+        else:
+            accuracies = [acc(logits, target)]
 
         return losses, accuracies
 
@@ -246,6 +251,7 @@ class ContrastTrainer(BaseTrainer):
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
             bsz = inputs.size(0)
+            batch_labels = data[2].float().view(bsz, 1).cuda(args.gpu, non_blocking=True) if args.sup_mode == 'mask' else None
 
             # warm-up learning rate
             self.warmup_learning_rate(
@@ -256,6 +262,8 @@ class ContrastTrainer(BaseTrainer):
 
             # shuffle BN for momentum encoder
             k, all_k = self._shuffle_bn(x2, model_ema)
+
+            all_k_labels = self._global_gather(batch_labels)
 
             # loss and metrics
             if args.jigsaw:
@@ -291,7 +299,7 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = losses[1]
                     update_acc_jig = accuracies[1]
             else:
-                q = model(x1)
+                q, q_online = model(x1)
                 if args.modal == 'CMC':
                     q1, q2 = torch.chunk(q, 2, dim=1)
                     k1, k2 = torch.chunk(k, 2, dim=1)
@@ -308,10 +316,17 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
                 else:
-                    output = contrast(q, k, all_k=all_k)
-                    losses, accuracies = self._compute_loss_accuracy(
-                        logits=output[:-1], target=output[-1],
-                        criterion=criterion)
+                    if args.sup_mode =='mask':
+                        output = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
+                        losses, accuracies = self._compute_loss_accuracy(
+                            logits=output, target=batch_labels,
+                            criterion=criterion, logits_online=q_online)
+                    else:
+                        output = contrast(q, k, all_k=all_k)
+                        losses, accuracies = self._compute_loss_accuracy(
+                            logits=output[:-1], target=output[-1],
+                            criterion=criterion)
+
                     loss = losses[0]
                     update_loss = losses[0]
                     update_acc = accuracies[0]
