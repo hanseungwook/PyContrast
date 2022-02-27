@@ -71,7 +71,7 @@ class BaseMoCo(nn.Module):
         logits = torch.mm(q, k_queue.transpose(1, 0))
         logits = torch.div(logits, self.T)
         # logits = torch.subtract(logits, torch.max(logits.detach(), dim=1, keepdim=True))
-        logits = logits - torch.max(logits.detach(), dim=1, keepdim=True)[0]
+        logits = logits - torch.max(logits.detach(), dim=1, keepdim=True)[0] # Do we need this?? especially b/c it's already normalized after projector
         exp_logits = torch.exp(logits)
 
         positives_mask = torch.eq(batch_labels, k_queue_labels.T).float().to(q.device)
@@ -98,7 +98,7 @@ class RGBMoCo(BaseMoCo):
         # create memory queue
         self.register_buffer('memory', torch.randn(K, n_dim))
         # create memory label queue
-        self.register_buffer('memory_labels', torch.randn(K, 1))
+        self.register_buffer('memory_labels', torch.zeros(K, 1).fill_(-1.0))
         self.memory = F.normalize(self.memory)
 
     def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, all_k_labels=None):
