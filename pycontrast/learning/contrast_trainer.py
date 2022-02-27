@@ -299,7 +299,7 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = losses[1]
                     update_acc_jig = accuracies[1]
             else:
-                q, q_online = model(x1)
+                q, q_online = model(x1, mode=3)
                 if args.modal == 'CMC':
                     q1, q2 = torch.chunk(q, 2, dim=1)
                     k1, k2 = torch.chunk(k, 2, dim=1)
