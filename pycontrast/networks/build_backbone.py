@@ -49,12 +49,12 @@ class RGBSingleHead(nn.Module):
         # 2: testing mode
         feat = self.encoder(x)
         if mode == 0 or mode == 1:
-            feat = self.head(feat)
-        
             feat_clf = self.online_clf(feat.detach())
 
+            feat = self.head(feat)
+
             return feat, feat_clf
-            
+
         return feat
 
 
