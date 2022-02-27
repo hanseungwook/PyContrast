@@ -41,6 +41,8 @@ class TrainOptions(BaseOptions):
             opt.model_name = '{}_amp_{}'.format(opt.model_name, opt.opt_level)
         if opt.cosine:
             opt.model_name = '{}_cosine'.format(opt.model_name)
+        if opt.sup_mode != '':
+            opt.model_name = '{}_{}'.format(opt.model_name, opt.sup_mode)
 
         # warm-up for large-batch training, e.g. 1024 with multiple nodes
         if opt.batch_size > 256:
