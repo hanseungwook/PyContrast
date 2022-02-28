@@ -52,6 +52,6 @@ class InfoNCE(torch.nn.Module):
         Returns:
             A loss scalar.
         """
-        loss = logits[:, 0] - logits.sum(dim=1)
+        loss = -1.0 * (torch.log(logits[:, 0]) - torch.log(logits.sum(dim=1)))
 
         return loss.mean()
