@@ -263,7 +263,7 @@ class ContrastTrainer(BaseTrainer):
             # shuffle BN for momentum encoder
             k, all_k = self._shuffle_bn(x2, model_ema)
 
-            all_k_labels = self._global_gather(batch_labels)
+            all_k_labels = self._global_gather(batch_labels) if args.sup_mode == 'mask' else None
 
             # loss and metrics
             if args.jigsaw:
