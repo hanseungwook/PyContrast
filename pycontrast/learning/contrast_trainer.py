@@ -130,7 +130,7 @@ class ContrastTrainer(BaseTrainer):
             del state
 
     def train(self, epoch, train_loader, model, model_ema, contrast,
-              criterion, optimizer):
+              criterion, optimizer, topk_dict):
         """one epoch training"""
         args = self.args
         model.train()
@@ -138,7 +138,7 @@ class ContrastTrainer(BaseTrainer):
         time1 = time.time()
         if args.mem == 'moco':
             outs = self._train_moco(epoch, train_loader, model, model_ema,
-                                    contrast, criterion, optimizer)
+                                    contrast, criterion, optimizer, topk_dict)
         else:
             outs = self._train_mem(epoch, train_loader, model,
                                    contrast, criterion, optimizer)
