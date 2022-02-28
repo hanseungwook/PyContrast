@@ -106,7 +106,7 @@ class RGBMoCo(BaseMoCo):
             logits = self._compute_logits_with_labels(q, k, queue, batch_labels, queue_labels)
         
         else:
-            logits = self._compute_logit(q, k, queue, batch_labels=batch_labels)
+            logits = self._compute_logit(q, k, queue)
             if q_jig is not None:
                 logits_jig = self._compute_logit(q_jig, k, queue)
 
