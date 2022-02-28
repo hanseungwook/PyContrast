@@ -255,7 +255,6 @@ class ContrastTrainer(BaseTrainer):
             batch_labels = data[2].float().view(bsz, 1).cuda(args.gpu, non_blocking=True)
 
             # Get top k labels for masking
-            topk_labels = None
             if topk_dict is not None:
                 pad = torch.nn.ConstantPad1d((0,1), -1)
                 topk_labels = [topk_dict[int(i)] if len(topk_dict[int(i)]) == 10 else pad(topk_dict[int(i)]) for i in batch_idxs]
