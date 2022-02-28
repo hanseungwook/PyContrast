@@ -326,8 +326,10 @@ class ContrastTrainer(BaseTrainer):
                         losses, accuracies = self._compute_loss_accuracy(
                             logits=output[0], target=batch_labels.long().squeeze(),
                             criterion=criterion, logits_online=q_online)
+                    
+                    clf_loss = torch.nn.functional.cross_entropy(q_online, batch_labels.long().squeeze())
 
-                    loss = losses[0]
+                    loss = losses[0] + clf_loss
                     update_loss = losses[0]
                     update_acc = accuracies[0]
                     update_loss_jig = torch.tensor([0.0])
