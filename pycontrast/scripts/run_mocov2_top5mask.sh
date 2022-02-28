@@ -26,7 +26,7 @@ python \
       --sup_mode topk-mask \
       --save_freq 5 \
       --topk 5 \
-      --resume $HOME2/scratch/PyContrast/pycontrast/saved_models/MoCov2_resnet50_RGB_Jig_False_moco_aug_B_mlp_0.2_cosine_mask_top5/current.pth
+      --resume $HOME2/scratch/PyContrast/pycontrast/saved_models/MoCov2_resnet50_RGB_Jig_False_moco_aug_B_mlp_0.2_cosine_topk-mask_5/current.pth
                                                            
 echo "Run completed at:- "
 date
