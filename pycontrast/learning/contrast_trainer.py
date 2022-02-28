@@ -76,6 +76,9 @@ class ContrastTrainer(BaseTrainer):
         """
         if self.args.modal == 'RGB':
             dist.broadcast(contrast.memory, 0)
+
+            if self.args.sup_mode == 'mask' or self.args.sup_mode == 'topk-mask':
+                dist.broadcast(contrast.memory_labels, 0)
         else:
             dist.broadcast(contrast.memory_1, 0)
             dist.broadcast(contrast.memory_2, 0)
@@ -107,7 +110,7 @@ class ContrastTrainer(BaseTrainer):
     def save(self, model, model_ema, contrast, optimizer, epoch):
         """save model to checkpoint"""
         args = self.args
-        if args.local_rank == 0:
+        if args.local_rank == 0 and args.node_rank == 0:
             # saving the model to each instance
             print('==> Saving...')
             state = {
@@ -270,7 +273,7 @@ class ContrastTrainer(BaseTrainer):
             # shuffle BN for momentum encoder
             k, all_k = self._shuffle_bn(x2, model_ema)
 
-            all_k_labels = self._global_gather(batch_labels) if args.sup_mode == 'mask' else None
+            all_k_labels = self._global_gather(batch_labels) if args.sup_mode == 'mask' or args.sup_mode == 'topk-mask' else None
 
             # loss and metrics
             if args.jigsaw:

@@ -61,11 +61,11 @@ def main_worker(gpu, ngpus_per_node, args):
     # wrap up models
     model, model_ema, optimizer = trainer.wrap_up(model, model_ema, optimizer)
 
-    # optional step: synchronize memory
-    trainer.broadcast_memory(contrast)
-
     # check and resume a model
     start_epoch = trainer.resume_model(model, model_ema, contrast, optimizer)
+
+    # optional step: synchronize memory
+    trainer.broadcast_memory(contrast)
 
     # init tensorboard logger
     trainer.init_tensorboard_logger()
