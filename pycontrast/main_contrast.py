@@ -43,7 +43,7 @@ def main_worker(gpu, ngpus_per_node, args):
         build_contrast_loader(args, ngpus_per_node)
 
     topk_dict = None
-    if args.sup_mode == 'top5-mask':
+    if args.sup_mode == 'topk-mask':
         print('Loading Top k dict', flush=True)
         topk_dict = load_topk(args)
 

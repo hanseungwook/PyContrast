@@ -21,6 +21,8 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--sup_mode', type=str, default='',
                             help='Supervised mode (Masking of positives in negatives',
                             choices=['mask', 'topk-mask'])
+        parser.add_argument('--topk', type=int, default=0,
+                            help='k top prediction classes to use for negative sample masking')
 
         return parser
 
@@ -43,6 +45,8 @@ class TrainOptions(BaseOptions):
             opt.model_name = '{}_cosine'.format(opt.model_name)
         if opt.sup_mode != '':
             opt.model_name = '{}_{}'.format(opt.model_name, opt.sup_mode)
+        if opt.topk > 0:
+            opt.model_name = '{}_{}'.format(opt.model_name, opt.topk)
 
         # warm-up for large-batch training, e.g. 1024 with multiple nodes
         if opt.batch_size > 256:
