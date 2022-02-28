@@ -251,7 +251,7 @@ class ContrastTrainer(BaseTrainer):
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
             bsz = inputs.size(0)
-            batch_labels = data[2].float().view(bsz, 1).cuda(args.gpu, non_blocking=True) if args.sup_mode == 'mask' else None
+            batch_labels = data[2].float().view(bsz, 1).cuda(args.gpu, non_blocking=True)
 
             # warm-up learning rate
             self.warmup_learning_rate(
@@ -319,13 +319,13 @@ class ContrastTrainer(BaseTrainer):
                     if args.sup_mode =='mask':
                         output = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
                         losses, accuracies = self._compute_loss_accuracy(
-                            logits=output, target=batch_labels,
+                            logits=output[0], target=batch_labels,
                             criterion=criterion, logits_online=q_online)
                     else:
                         output = contrast(q, k, all_k=all_k)
                         losses, accuracies = self._compute_loss_accuracy(
-                            logits=output[:-1], target=output[-1],
-                            criterion=criterion)
+                            logits=output[0], target=batch_labels,
+                            criterion=criterion, logits_online=q_online)
 
                     loss = losses[0]
                     update_loss = losses[0]
