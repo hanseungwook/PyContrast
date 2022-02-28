@@ -215,7 +215,7 @@ class ContrastTrainer(BaseTrainer):
             return acc1[0]
 
         # accuracies = [acc(logit, target) for logit in logits]
-        if logits_online:
+        if logits_online is not None:
             accuracies = [acc(logits_online, target)]
         else:
             accuracies = [acc(logits, target)]
