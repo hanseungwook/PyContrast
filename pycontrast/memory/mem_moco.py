@@ -47,7 +47,8 @@ class BaseMoCo(nn.Module):
 
         out = torch.cat((pos, neg), dim=1)
         out = torch.div(out, self.T)
-        out = out.squeeze().contiguous()
+        # out = out.squeeze().contiguous()
+        out = torch.exp(out).squeeze().contiguous()
 
         return out
     

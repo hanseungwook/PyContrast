@@ -52,7 +52,7 @@ def main_worker(gpu, ngpus_per_node, args):
     contrast.cuda()
 
     # build criterion and optimizer
-    criterion = InfoNCE().cuda() if args.sup_mode == 'mask' or args.sup_mode == 'topk-mask' else nn.CrossEntropyLoss().cuda()
+    criterion = InfoNCE().cuda() #if args.sup_mode == 'mask' or args.sup_mode == 'topk-mask' else nn.CrossEntropyLoss().cuda()
     optimizer = torch.optim.SGD(model.parameters(),
                                 lr=args.learning_rate,
                                 momentum=args.momentum,
