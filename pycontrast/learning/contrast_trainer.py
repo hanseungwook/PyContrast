@@ -336,7 +336,7 @@ class ContrastTrainer(BaseTrainer):
                     else:
                         output = contrast(q, k, all_k=all_k)
                         losses, accuracies = self._compute_loss_accuracy(
-                            logits=output[0], target=batch_labels.long().squeeze(),
+                            logits=output[0], target=output[1],
                             criterion=criterion, logits_online=q_online)
                     
                     clf_loss = torch.nn.functional.cross_entropy(q_online, batch_labels.long().squeeze())
