@@ -324,7 +324,7 @@ class ContrastTrainer(BaseTrainer):
                     else:
                         output = contrast(q, k, all_k=all_k)
                         losses, accuracies = self._compute_loss_accuracy(
-                            logits=output[0], target=batch_labels,
+                            logits=output[0], target=batch_labels.long(),
                             criterion=criterion, logits_online=q_online)
 
                     loss = losses[0]
