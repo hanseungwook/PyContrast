@@ -223,7 +223,7 @@ class ContrastTrainer(BaseTrainer):
         return losses, accuracies
 
     def _train_moco(self, epoch, train_loader, model, model_ema, contrast,
-                    criterion, optimizer):
+                    criterion, optimizer, topk_dict):
         """
         MoCo encoder style training. This needs two forward passes,
         one for normal encoder, and one for moco encoder
@@ -251,7 +251,15 @@ class ContrastTrainer(BaseTrainer):
 
             inputs = data[0].float().cuda(args.gpu, non_blocking=True)
             bsz = inputs.size(0)
+            batch_idxs = data[1]
             batch_labels = data[2].float().view(bsz, 1).cuda(args.gpu, non_blocking=True)
+
+            # Get top k labels for masking
+            topk_labels = None
+            if topk_dict is not None:
+                pad = torch.nn.ConstantPad1d((0,1), -1)
+                topk_labels = [topk_dict[int(i)] if len(topk_dict[int(i)]) == 10 else pad(topk_dict[int(i)]) for i in batch_idxs]
+                topk_labels = torch.stack(topk_labels, dim=0)[:, :args.topk].clone().cuda(args.gpu, non_blocking=True)
 
             # warm-up learning rate
             self.warmup_learning_rate(
@@ -316,8 +324,13 @@ class ContrastTrainer(BaseTrainer):
                     update_loss_jig = torch.tensor([0.0])
                     update_acc_jig = torch.tensor([0.0])
                 else:
-                    if args.sup_mode =='mask':
+                    if args.sup_mode == 'mask':
                         output = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels)
+                        losses, accuracies = self._compute_loss_accuracy(
+                            logits=output[0], target=batch_labels,
+                            criterion=criterion, logits_online=q_online)
+                    elif args.sup_mode == 'topk-mask':
+                        output = contrast(q, k, all_k=all_k, batch_labels=batch_labels, all_k_labels=all_k_labels, topk_labels=topk_labels)
                         losses, accuracies = self._compute_loss_accuracy(
                             logits=output[0], target=batch_labels,
                             criterion=criterion, logits_online=q_online)

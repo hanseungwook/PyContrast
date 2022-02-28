@@ -20,7 +20,7 @@ class TrainOptions(BaseOptions):
                             choices=['O1', 'O2'])
         parser.add_argument('--sup_mode', type=str, default='',
                             help='Supervised mode (Masking of positives in negatives',
-                            choices=['mask'])
+                            choices=['mask', 'topk-mask'])
 
         return parser
 

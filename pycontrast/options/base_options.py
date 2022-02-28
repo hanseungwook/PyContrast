@@ -29,6 +29,8 @@ class BaseOptions(object):
                             help='path to tensorboard')
         parser.add_argument('--exp_name', type=str, default='SupConMocoV2',
                             help='name of experiment')
+        parser.add_argument('--topk_path', type=str, default='./imagenet_resnet50_top10.pkl',
+                            help='path to topk predictions from pre-trained classifier')
 
         # basics
         parser.add_argument('--print_freq', type=int, default=10,

@@ -13,20 +13,20 @@ from learning.contrast_trainer import ContrastTrainer
 from learning.util import InfoNCE
 from networks.build_backbone import build_model
 from datasets.util import build_contrast_loader
-from memory.build_memory import build_mem
+from memory.build_memory import build_mem, load_topk
 
 
-def main():
-    args = TrainOptions().parse()
+# def main():
+#     args = TrainOptions().parse()
 
-    args.distributed = args.world_size > 1 or args.multiprocessing_distributed
-    ngpus_per_node = torch.cuda.device_count()
+#     args.distributed = args.world_size > 1 or args.multiprocessing_distributed
+#     ngpus_per_node = torch.cuda.device_count()
 
-    if args.multiprocessing_distributed:
-        args.world_size = ngpus_per_node * args.world_size
-        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
-    else:
-        raise NotImplementedError('Currently only DDP training')
+#     if args.multiprocessing_distributed:
+#         args.world_size = ngpus_per_node * args.world_size
+#         mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
+#     else:
+#         raise NotImplementedError('Currently only DDP training')
 
 
 def main_worker(gpu, ngpus_per_node, args):
@@ -41,6 +41,11 @@ def main_worker(gpu, ngpus_per_node, args):
     # build dataset
     train_dataset, train_loader, train_sampler = \
         build_contrast_loader(args, ngpus_per_node)
+
+    topk_dict = None
+    if args.sup_mode == 'top5-mask':
+        print('Loading Top k dict', flush=True)
+        topk_dict = load_topk(args)
 
     # build memory
     contrast = build_mem(args, len(train_dataset))
@@ -70,7 +75,7 @@ def main_worker(gpu, ngpus_per_node, args):
         trainer.adjust_learning_rate(optimizer, epoch)
 
         outs = trainer.train(epoch, train_loader, model, model_ema,
-                             contrast, criterion, optimizer)
+                             contrast, criterion, optimizer, topk_dict)
 
         # log to tensorbard
         trainer.logging(epoch, outs, optimizer.param_groups[0]['lr'])
@@ -79,5 +84,5 @@ def main_worker(gpu, ngpus_per_node, args):
         trainer.save(model, model_ema, contrast, optimizer, epoch)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

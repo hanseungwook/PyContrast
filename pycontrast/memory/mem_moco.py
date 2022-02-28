@@ -51,7 +51,7 @@ class BaseMoCo(nn.Module):
 
         return out
     
-    def _compute_logits_with_labels(self, q, k, queue, batch_labels, queue_labels):
+    def _compute_logits_with_labels(self, q, k, queue, batch_labels, queue_labels, topk_labels):
         """
         Args:
           q: query/anchor feature
@@ -66,7 +66,11 @@ class BaseMoCo(nn.Module):
         pos = pos.view(bsz, 1)
         pos = torch.exp(torch.div(pos, self.T))
 
-        neg_mask = (~torch.eq(batch_labels, queue_labels.transpose(1,0))).float().cuda(non_blocking=True)
+        if topk_labels is not None:
+            neg_mask = torch.eq(topk_labels.unsqueeze(-1).permute(1,0,2), queue_labels.permute(1,0))
+            neg_mask = neg_mask.any(dim=0).float().cuda()
+        else:
+            neg_mask = (~torch.eq(batch_labels, queue_labels.transpose(1,0))).float().cuda(non_blocking=True)
         
         # exp neg logit
         neg = torch.mm(queue, q.transpose(1, 0))
@@ -87,7 +91,7 @@ class RGBMoCo(BaseMoCo):
         self.register_buffer('memory_labels', torch.randn(K, 1))
         self.memory = F.normalize(self.memory)
 
-    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, all_k_labels=None):
+    def forward(self, q, k, q_jig=None, all_k=None, batch_labels=None, all_k_labels=None, topk_labels=None):
         """
         Args:
           q: query on current node
@@ -103,7 +107,7 @@ class RGBMoCo(BaseMoCo):
 
         if batch_labels is not None:
             queue_labels = self.memory_labels.clone().detach()
-            logits = self._compute_logits_with_labels(q, k, queue, batch_labels, queue_labels)
+            logits = self._compute_logits_with_labels(q, k, queue, batch_labels, queue_labels, topk_labels)
         
         else:
             logits = self._compute_logit(q, k, queue)
