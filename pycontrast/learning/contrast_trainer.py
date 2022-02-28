@@ -203,7 +203,7 @@ class ContrastTrainer(BaseTrainer):
         return k, all_k
 
     @staticmethod
-    def _compute_loss_accuracy(logits, target, criterion, logits_online=None):
+    def _compute_loss_accuracy(logits, target, criterion, logits_online=None, target_online=None):
         """
         Args:
           logits: a list of logits, each with a contrastive task
@@ -218,7 +218,10 @@ class ContrastTrainer(BaseTrainer):
             return acc1[0]
 
         # accuracies = [acc(logit, target) for logit in logits]
-        if logits_online is not None:
+        # for when you have separate labels for loss & classification
+        if logits_online is not None and target_online is not None:
+            accuracies = [acc(logits_online, target_online)]
+        elif logits_online is not None:
             accuracies = [acc(logits_online, target)]
         else:
             accuracies = [acc(logits, target)]
