@@ -66,7 +66,7 @@ class BaseMoCo(nn.Module):
         pos = pos.view(bsz, 1)
         pos = torch.exp(torch.div(pos, self.T))
 
-        neg_mask = ~torch.eq(batch_labels, queue_labels.transpose(1,0)).float().cuda(non_blocking=True)
+        neg_mask = (~torch.eq(batch_labels, queue_labels.transpose(1,0))).float().cuda(non_blocking=True)
         
         # exp neg logit
         neg = torch.mm(queue, q.transpose(1, 0))
