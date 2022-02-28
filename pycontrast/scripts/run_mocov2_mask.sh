@@ -11,7 +11,7 @@ conda activate $PYTHON_VIRTUAL_ENVIRONMENT
 ulimit -s unlimited
 
 python \
-      $HOME2/scratch/PyContrast-SupCon/pycontrast/launcher.py \
+      $HOME2/scratch/PyContrast/pycontrast/launcher.py \
       --method MoCov2 \
       --cosine \
       --data_folder /gpfs/u/locker/200/CADS/datasets/ImageNet/ \
@@ -20,12 +20,12 @@ python \
       --rank 0 \
       --num_workers 32 \
       --ngpus 6 \
-      --model_path $HOME2/scratch/PyContrast-SupCon/pycontrast/saved_models/ \
-      --tb_path $HOME2/scratch/PyContrast-SupCon/pycontrast/logs/ \
+      --model_path $HOME2/scratch/PyContrast/pycontrast/saved_models/ \
+      --tb_path $HOME2/scratch/PyContrast/pycontrast/logs/ \
       --sup_mode mask \
       --save_freq 5 \
-      --resume $HOME2/scratch/PyContrast-SupCon/pycontrast/saved_models/MoCov2_resnet50_RGB_Jig_False_moco_aug_B_mlp_0.2_cosine_mask/current.pth
-
+      --resume $HOME2/scratch/PyContrast/pycontrast/saved_models/MoCov2_resnet50_RGB_Jig_False_moco_aug_B_mlp_0.2_cosine_mask/current.pth
+                                                           
 echo "Run completed at:- "
 date
 
